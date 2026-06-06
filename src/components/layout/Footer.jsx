@@ -1,82 +1,84 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Twitter, Linkedin, Github, Youtube, Send, ArrowUpRight } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Linkedin, Instagram, ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const location = useLocation();
 
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email) return;
-    setSubscribed(true);
-    setEmail('');
-    setTimeout(() => {
-      setSubscribed(false);
-    }, 4000);
+  const handleNavClick = (item) => {
+    if (item.scrollTo) {
+      if (location.pathname === '/') {
+        const element = document.getElementById(item.scrollTo);
+        if (element) {
+          const offset = 80;
+          const bodyRect = document.body.getBoundingClientRect().top;
+          const elementRect = element.getBoundingClientRect().top;
+          const elementPosition = elementRect - bodyRect;
+          const offsetPosition = elementPosition - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        }
+      } else {
+        navigate('/', { state: { scrollTo: item.scrollTo } });
+      }
+    } else {
+      if (item.path === location.pathname) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate(item.path);
+      }
+    }
   };
 
-  const handleNavClick = (path) => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    navigate(path);
-  };
+  const companyLinks = [
+    { name: 'Home', scrollTo: 'home', path: '/' },
+    { name: 'Services', scrollTo: 'services', path: '/#services' },
+    { name: 'About', scrollTo: 'about', path: '/#about' },
+    { name: 'FAQ', scrollTo: 'faq', path: '/#faq' },
+    { name: 'Contact', scrollTo: 'contact', path: '/#contact' },
+  ];
 
   return (
-    <footer className="relative bg-[#F8FAFC] border-t border-slate-200/50 overflow-hidden pt-20 pb-10 z-10 backdrop-blur-xl">
+    <footer className="relative bg-[#0F172A] border-t border-slate-800/50 overflow-hidden pt-20 pb-10 z-10 backdrop-blur-xl text-white">
       
       {/* Premium Top Border Gradient */}
       <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-start via-brand-accent to-brand-end opacity-80" />
 
-      {/* Background Decorative Glow */}
-      <div className="absolute bottom-[-100px] right-[-100px] w-96 h-96 rounded-full bg-gradient-to-tr from-brand-accent to-brand-end opacity-5 blur-[80px]" />
+
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
         
         {/* Brand Information */}
         <div className="flex flex-col gap-5 text-left">
           <div 
-            onClick={() => handleNavClick('/')} 
+            onClick={() => handleNavClick({ scrollTo: 'home', path: '/' })} 
             className="flex items-center gap-2.5 cursor-pointer select-none group"
           >
-            <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200/60 p-1.5 transition-transform duration-300 group-hover:scale-105 shadow-glass">
-              <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <path d="M25 75C25 50 35 30 50 30C65 30 75 50 75 75" stroke="url(#footerLogoGrad)" strokeWidth="12" strokeLinecap="round" />
-                <circle cx="50" cy="42" r="10" fill="url(#footerLogoGradDot)" />
-                <defs>
-                  <linearGradient id="footerLogoGrad" x1="25" y1="30" x2="75" y2="75" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="var(--color-gradient-start)" />
-                    <stop offset="100%" stopColor="var(--color-gradient-end)" />
-                  </linearGradient>
-                  <linearGradient id="footerLogoGradDot" x1="40" y1="32" x2="60" y2="52" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#0EA5E9" />
-                    <stop offset="100%" stopColor="#7C3AED" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <span className="font-outfit font-extrabold text-xl tracking-tight text-text-primary">
+            <img src="/UTC.png" alt="UareTech Logo" className="w-11 h-11 object-contain transition-transform duration-300 group-hover:scale-105" />
+            <span className="font-outfit font-extrabold text-xl tracking-tight text-white">
               Uare<span className="text-gradient">Tech</span>
             </span>
           </div>
-          <p className="font-inter text-sm font-medium leading-relaxed text-text-tertiary">
-            “We make businesses become tech-enabled.” Transforming operations through modern software architectures and fine-tuned AI integration pipelines.
+          <p className="font-inter text-sm font-medium leading-relaxed text-slate-400">
+            Innovating Technology. Accelerating Growth. Building Future-Ready Businesses.
           </p>
           
           {/* Social Channels */}
           <div className="flex items-center gap-3 mt-2">
             {[
-              { icon: Twitter, link: 'https://twitter.com' },
-              { icon: Linkedin, link: 'https://linkedin.com' },
-              { icon: Github, link: 'https://github.com' },
-              { icon: Youtube, link: 'https://youtube.com' },
+              { icon: Linkedin, link: 'https://linkedin.com', label: 'LinkedIn' },
+              { icon: Instagram, link: 'https://instagram.com', label: 'Instagram' },
             ].map((social, i) => (
               <a
                 key={i}
                 href={social.link}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200/60 text-text-tertiary hover:text-brand-primary hover:border-brand-primary/40 shadow-glass transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-brand-primary/40 shadow-glass transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                aria-label={social.label}
               >
                 <social.icon className="w-4 h-4" />
               </a>
@@ -86,18 +88,12 @@ const Footer = () => {
 
         {/* Quick links */}
         <div className="flex flex-col gap-5 text-left">
-          <h4 className="font-outfit text-base font-bold text-text-primary">Company Links</h4>
-          <ul className="flex flex-col gap-3 font-inter text-sm font-medium text-text-tertiary">
-            {[
-              { name: 'Home', path: '/' },
-              { name: 'About Us', path: '/about' },
-              { name: 'Core Services', path: '/services' },
-              { name: 'Featured Portfolio', path: '/portfolio' },
-              { name: 'Get In Touch', path: '/contact' },
-            ].map((link, i) => (
+          <h4 className="font-outfit text-base font-bold !text-white">Company Links</h4>
+          <ul className="flex flex-col gap-3 font-inter text-sm font-medium text-slate-400">
+            {companyLinks.map((link, i) => (
               <li key={i}>
                 <button
-                  onClick={() => handleNavClick(link.path)}
+                  onClick={() => handleNavClick(link)}
                   className="hover:text-brand-primary flex items-center gap-1 group transition-colors duration-200 cursor-pointer text-left"
                 >
                   <span>{link.name}</span>
@@ -110,8 +106,8 @@ const Footer = () => {
 
         {/* Services quick-links */}
         <div className="flex flex-col gap-5 text-left">
-          <h4 className="font-outfit text-base font-bold text-text-primary">Core Services</h4>
-          <ul className="flex flex-col gap-3 font-inter text-sm font-medium text-text-tertiary">
+          <h4 className="font-outfit text-base font-bold !text-white">Core Services</h4>
+          <ul className="flex flex-col gap-3 font-inter text-sm font-medium text-slate-400">
             {[
               'Web Development',
               'Mobile App Development',
@@ -121,7 +117,7 @@ const Footer = () => {
             ].map((service, i) => (
               <li key={i}>
                 <button
-                  onClick={() => handleNavClick('/services')}
+                  onClick={() => handleNavClick({ scrollTo: 'services' })}
                   className="hover:text-brand-primary flex items-center gap-1 group transition-colors duration-200 cursor-pointer text-left"
                 >
                   <span>{service}</span>
@@ -132,45 +128,21 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Newsletter Signup */}
+        {/* Studio Location */}
         <div className="flex flex-col gap-5 text-left">
-          <h4 className="font-outfit text-base font-bold text-text-primary">Stay Updated</h4>
-          <p className="font-inter text-sm font-medium leading-relaxed text-text-tertiary">
-            Subscribe to our monthly tech updates and receive case studies on digital transformations.
+          <h4 className="font-outfit text-base font-bold !text-white">Our Studio</h4>
+          <p className="font-inter text-sm font-medium leading-relaxed text-slate-400">
+            Madurai, Tamil Nadu, India
           </p>
-          
-          <form onSubmit={handleSubscribe} className="relative flex items-center">
-            <input
-              type="email"
-              placeholder="Your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full pl-4 pr-12 py-3 rounded-full bg-white border border-slate-200 focus:border-brand-primary/40 focus:bg-white outline-none text-sm font-inter font-medium text-slate-900 shadow-glass placeholder:text-text-tertiary"
-            />
-            <button
-              type="submit"
-              className="absolute right-1.5 p-2 rounded-full bg-gradient-to-r from-brand-start to-brand-end text-white hover:brightness-105 shadow-sm transition-all duration-200 cursor-pointer flex items-center justify-center"
-              aria-label="Subscribe"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
-
-          {subscribed && (
-            <span className="text-xs font-semibold text-brand-primary animate-pulse">
-              🎉 Subscription successful! Welcome aboard.
-            </span>
-          )}
         </div>
 
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <span className="font-inter text-xs font-semibold text-text-tertiary">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <span className="font-inter text-xs font-semibold text-slate-500">
           © {new Date().getFullYear()} UareTech. All rights reserved.
         </span>
-        <div className="flex gap-6 font-inter text-xs font-semibold text-text-tertiary">
+        <div className="flex gap-6 font-inter text-xs font-semibold text-slate-500">
           <a href="#privacy" className="hover:text-brand-primary transition-colors">Privacy Policy</a>
           <a href="#terms" className="hover:text-brand-primary transition-colors">Terms of Service</a>
         </div>

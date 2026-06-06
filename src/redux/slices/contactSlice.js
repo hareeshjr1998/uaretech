@@ -5,6 +5,7 @@ const initialState = {
     name: '',
     email: '',
     phone: '',
+    service: '',
     message: '',
   },
   status: 'idle', // idle, sending, success, error
@@ -19,7 +20,7 @@ const contactSlice = createSlice({
       state.formData = { ...state.formData, ...action.payload };
     },
     resetForm: (state) => {
-      state.formData = { name: '', email: '', phone: '', message: '' };
+      state.formData = { name: '', email: '', phone: '', service: '', message: '' };
       state.status = 'idle';
       state.errorMessage = null;
     },

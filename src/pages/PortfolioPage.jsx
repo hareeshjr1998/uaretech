@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { ExternalLink, Github, X, Eye, Sparkles, Check } from 'lucide-react';
@@ -5,8 +6,41 @@ import { setCategory, setSelectedProject, clearSelectedProject } from '../redux/
 import { projectsData, portfolioCategories } from '../data/siteData';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import FloatingBlobs from '../components/common/FloatingBlobs';
 import PageTransition from '../components/common/PageTransition';
+
+// Define project details mapping static data outside component scope to prevent garbage collection allocations on render
+const projectDetailsMap = {
+  1: {
+    features: ['Real-time dashboard charting with Chart.js integration', 'Automated natural language summary pipelines', 'Safe LLM model execution benchmarks', 'Shared collaborative prompt nodes'],
+    teamSize: '4 Experts',
+    timeline: '8 Weeks'
+  },
+  2: {
+    features: ['Automated carbon footprint tracking calculations', 'High efficiency micro-checkout screens with Stripe', 'Smart warehouse green logistic routing', 'Custom customer product reviews and stats'],
+    teamSize: '3 Experts',
+    timeline: '6 Weeks'
+  },
+  3: {
+    features: ['Continuous telemetry heart rating curves', 'Cross platform sync via secure GraphQL API', 'Interactive dietary goals dashboards', 'Push notification workflow runs'],
+    teamSize: '2 Experts',
+    timeline: '4 Weeks'
+  },
+  4: {
+    features: ['30+ reusable responsive UI glass components', 'Dynamic dark/light styling variables configuration', 'Detailed pixel-perfect typography tokens', 'Figma developer workspace layout assets'],
+    teamSize: '1 Designer',
+    timeline: '3 Weeks'
+  },
+  5: {
+    features: ['Real time aircraft telemetry GPS mappings', 'Weather condition forecasting charts integration', 'Pilot hours monitoring lists', 'Automated horizontal emergency re-routing engines'],
+    teamSize: '5 Experts',
+    timeline: '10 Weeks'
+  },
+  6: {
+    features: ['Algorithmic stock rebalancing analytics', 'Secure financial token encryption layers', 'Daily automated financial email pipelines', 'Intelligent buy/sell alarm notifications'],
+    teamSize: '3 Experts',
+    timeline: '7 Weeks'
+  }
+};
 
 const PortfolioPage = () => {
   const dispatch = useDispatch();
@@ -14,49 +48,15 @@ const PortfolioPage = () => {
   const activeCategory = useSelector((state) => state.portfolio.activeCategory);
   const selectedProject = useSelector((state) => state.portfolio.selectedProject);
 
-  const filteredProjects = activeCategory === 'All'
-    ? projectsData
-    : projectsData.filter((p) => p.category === activeCategory);
-
-  // Extend project features list for the details modal
-  const projectDetailsMap = {
-    1: {
-      features: ['Real-time dashboard charting with Chart.js integration', 'Automated natural language summary pipelines', 'Safe LLM model execution benchmarks', 'Shared collaborative prompt nodes'],
-      teamSize: '4 Experts',
-      timeline: '8 Weeks'
-    },
-    2: {
-      features: ['Automated carbon footprint tracking calculations', 'High efficiency micro-checkout screens with Stripe', 'Smart warehouse green logistic routing', 'Custom customer product reviews and stats'],
-      teamSize: '3 Experts',
-      timeline: '6 Weeks'
-    },
-    3: {
-      features: ['Continuous telemetry heart rating curves', 'Cross platform sync via secure GraphQL API', 'Interactive dietary goals dashboards', 'Push notification workflow runs'],
-      teamSize: '2 Experts',
-      timeline: '4 Weeks'
-    },
-    4: {
-      features: ['30+ reusable responsive UI glass components', 'Dynamic dark/light styling variables configuration', 'Detailed pixel-perfect typography tokens', 'Figma developer workspace layout assets'],
-      teamSize: '1 Designer',
-      timeline: '3 Weeks'
-    },
-    5: {
-      features: ['Real time aircraft telemetry GPS mappings', 'Weather condition forecasting charts integration', 'Pilot hours monitoring lists', 'Automated horizontal emergency re-routing engines'],
-      teamSize: '5 Experts',
-      timeline: '10 Weeks'
-    },
-    6: {
-      features: ['Algorithmic stock rebalancing analytics', 'Secure financial token encryption layers', 'Daily automated financial email pipelines', 'Intelligent buy/sell alarm notifications'],
-      teamSize: '3 Experts',
-      timeline: '7 Weeks'
-    }
-  };
+  const filteredProjects = useMemo(() => {
+    return activeCategory === 'All'
+      ? projectsData
+      : projectsData.filter((p) => p.category === activeCategory);
+  }, [activeCategory]);
 
   return (
     <PageTransition>
       <div className="relative min-h-screen w-full flex flex-col overflow-hidden bg-[#EEF4FF] text-text-secondary">
-        {/* Decorative elements */}
-        <FloatingBlobs />
         
         {/* Navigation */}
         <Navbar />
@@ -134,8 +134,9 @@ const PortfolioPage = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ y: -6 }}
                     transition={{ duration: 0.4 }}
-                    className="glass-card border-glow-card overflow-hidden text-left flex flex-col justify-between group hover:shadow-glass-hover hover:-translate-y-1.5 transition-all duration-300 bg-white border border-slate-200/60 shadow-glass"
+                    className="glass-card border-glow-card overflow-hidden text-left flex flex-col justify-between group hover:shadow-glass-hover transition-[border-color,background-color,box-shadow] duration-300 bg-white border border-slate-200/60 shadow-glass"
                   >
                     <div>
                       {/* Image Frame */}

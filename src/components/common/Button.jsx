@@ -8,7 +8,7 @@ const Button = ({
   type = 'button',
   disabled = false 
 }) => {
-  const baseStyles = "relative px-6 py-3 rounded-full font-outfit font-semibold text-sm tracking-wide transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer outline-none select-none";
+  const baseStyles = "relative px-6 py-3 rounded-full font-outfit font-semibold text-sm tracking-wide transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer outline-none select-none";
   
   if (variant === 'primary') {
     return (
@@ -33,9 +33,11 @@ const Button = ({
         onClick={onClick}
         whileHover={{ scale: 1.03, translateY: -2 }}
         whileTap={{ scale: 0.97 }}
-        className={`${baseStyles} gradient-border-btn text-brand-primary disabled:opacity-50 disabled:pointer-events-none ${className}`}
+        className={`relative rounded-full font-outfit font-semibold text-sm tracking-wide transition-colors duration-300 flex items-center justify-center cursor-pointer outline-none select-none gradient-border-btn text-brand-primary disabled:opacity-50 disabled:pointer-events-none ${className}`}
       >
-        <span className="relative z-10 bg-clip-text text-gradient">{children}</span>
+        <span className="relative z-10 px-6 py-3 flex items-center justify-center gap-2 bg-clip-text text-gradient">
+          {children}
+        </span>
       </motion.button>
     );
   }

@@ -12,46 +12,101 @@ const Navbar = () => {
   const navigate = useNavigate();
   
   const isOpen = useSelector((state) => state.nav.isOpen);
+  const activeSection = useSelector((state) => state.nav.activeSection);
   
   const [scrolled, setScrolled] = useState(false);
 
   const menuItems = [
     { label: 'Home', id: 'home', path: '/' },
-    { label: 'About', id: 'about', path: '/about' },
-    { label: 'Services', id: 'services', path: '/services' },
-    { label: 'Portfolio', id: 'portfolio', path: '/portfolio' },
-    { label: 'Contact', id: 'contact', path: '/contact' },
+    { label: 'Services', id: 'services', path: '/#services', scrollTo: 'services' },
+    { label: 'About', id: 'about', path: '/#about', scrollTo: 'about' },
+    { label: 'FAQ', id: 'faq', path: '/#faq', scrollTo: 'faq' },
+    { label: 'Contact', id: 'contact', path: '/#contact', scrollTo: 'contact' },
   ];
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const isScrolled = window.scrollY > 20;
+          setScrolled((prev) => (prev === isScrolled ? prev : isScrolled));
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleNavClick = (item) => {
     dispatch(closeMenu());
-    if (item.path === location.pathname) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (item.scrollTo) {
+      if (location.pathname === '/') {
+        const element = document.getElementById(item.scrollTo);
+        if (element) {
+          const offset = 80;
+          const bodyRect = document.body.getBoundingClientRect().top;
+          const elementRect = element.getBoundingClientRect().top;
+          const elementPosition = elementRect - bodyRect;
+          const offsetPosition = elementPosition - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        }
+      } else {
+        navigate('/', { state: { scrollTo: item.scrollTo } });
+      }
     } else {
-      navigate(item.path);
+      if (item.path === location.pathname) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        navigate(item.path);
+      }
     }
   };
 
   const isItemActive = (item) => {
+    if (location.pathname === '/') {
+      if (item.id === 'services') {
+        return activeSection === 'services';
+      }
+      if (item.id === 'faq') {
+        return activeSection === 'faq';
+      }
+      if (item.id === 'about') {
+        return activeSection === 'about';
+      }
+      if (item.id === 'contact') {
+        return activeSection === 'contact';
+      }
+      if (item.id === 'home') {
+        return (
+          activeSection !== 'services' &&
+          activeSection !== 'faq' &&
+          activeSection !== 'about' &&
+          activeSection !== 'contact'
+        );
+      }
+    }
     return location.pathname === item.path;
   };
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 py-4 ${
         scrolled 
-          ? 'bg-white/75 backdrop-blur-xl border-b border-slate-200/40 py-4 shadow-glass' 
-          : 'bg-transparent py-6'
+          ? 'bg-white/75 border-b border-slate-200/40 shadow-glass' 
+          : 'bg-white/0 border-b border-transparent shadow-none'
       }`}
+      style={{ 
+        backfaceVisibility: 'hidden',
+        willChange: 'transform, background-color, border-color, box-shadow'
+      }}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
         
@@ -60,29 +115,14 @@ const Navbar = () => {
           onClick={() => handleNavClick({ path: '/' })} 
           className="flex items-center gap-2.5 cursor-pointer select-none group"
         >
-          <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-bg-card border border-slate-200/60 p-1.5 transition-all duration-300 group-hover:scale-105 group-hover:border-brand-primary/40 shadow-glass">
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-              <path d="M25 75C25 50 35 30 50 30C65 30 75 50 75 75" stroke="url(#navLogoGrad)" strokeWidth="12" strokeLinecap="round" />
-              <circle cx="50" cy="42" r="10" fill="url(#navLogoGradDot)" />
-              <defs>
-                <linearGradient id="navLogoGrad" x1="25" y1="30" x2="75" y2="75" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="var(--color-gradient-start)" />
-                  <stop offset="100%" stopColor="var(--color-gradient-end)" />
-                </linearGradient>
-                <linearGradient id="navLogoGradDot" x1="40" y1="32" x2="60" y2="52" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="var(--color-primary)" />
-                  <stop offset="100%" stopColor="var(--color-secondary)" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+          <img src="/UTC.png" alt="UareTech Logo" className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105" />
           <span className="font-outfit font-extrabold text-2xl tracking-tight text-text-primary group-hover:opacity-90 transition-opacity">
             Uare<span className="text-gradient">Tech</span>
           </span>
         </div>
 
         {/* Desktop Menu Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-8">
           {menuItems.map((item) => {
             const active = isItemActive(item);
             return (
@@ -107,14 +147,14 @@ const Navbar = () => {
         </nav>
 
         {/* Action Controls (Get Started) */}
-        <div className="hidden md:flex items-center gap-4">
-          <Button variant="primary" onClick={() => navigate('/contact')}>
+        <div className="hidden lg:flex items-center gap-4">
+          <Button variant="primary" onClick={() => handleNavClick({ scrollTo: 'contact' })}>
             Get Started
           </Button>
         </div>
 
         {/* Mobile controls */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex lg:hidden items-center gap-3">
           {/* Menu Toggle */}
           <button
             onClick={() => dispatch(toggleMenu())}
@@ -135,7 +175,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-glass absolute top-full left-0 right-0 z-40"
+            className="lg:hidden overflow-hidden bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-glass absolute top-full left-0 right-0 z-40"
           >
             <div className="px-6 py-6 flex flex-col gap-4">
               {menuItems.map((item) => {
@@ -156,8 +196,7 @@ const Navbar = () => {
               <div className="h-[1px] bg-slate-100 my-2" />
               
               <Button variant="primary" className="w-full" onClick={() => {
-                dispatch(closeMenu());
-                navigate('/contact');
+                handleNavClick({ scrollTo: 'contact' });
               }}>
                 Get Started
               </Button>

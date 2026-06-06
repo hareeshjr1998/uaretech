@@ -1,18 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 
 const phrases = [
-  'scalable digital products',
-  'intelligent AI solutions',
-  'modern premium websites',
-  'scalable cloud systems',
+  'Web Engineering',
+  'App Development',
+  'AI Chatbots',
+  'WhatsApp Automation',
+  'SaaS Products',
+  'Meta Ads Campaigns',
+  'Google Ads Solutions',
+  'Workflow Automation',
+  'CRM Systems',
+  'E-Commerce Stores',
+  'Mobile Apps',
+  'Business Dashboards',
+  'Cloud Solutions',
+  'Cybersecurity Systems',
 ];
 
-const Hero = () => {
-  const navigate = useNavigate();
+const TypingText = memo(() => {
   const [typedText, setTypedText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -43,6 +52,16 @@ const Hero = () => {
     return () => clearTimeout(timer);
   }, [typedText, isDeleting, phraseIndex]);
 
+  return (
+    <span className="text-gradient font-extrabold font-outfit border-r-[2.5px] border-brand-primary pr-1.5 animate-pulse">
+      {typedText}
+    </span>
+  );
+});
+
+const Hero = () => {
+  const navigate = useNavigate();
+
   const handleScrollTo = (id) => {
     const element = document.getElementById(id);
     if (element) {
@@ -62,16 +81,17 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center pt-28 pb-16 overflow-hidden z-10 bg-grid bg-white"
+      className="relative min-h-screen flex items-center justify-center pt-32 pb-20 md:pt-48 md:pb-28 overflow-hidden z-10 bg-grid"
+      style={{
+        backgroundColor: '#FFFFFF'
+      }}
     >
-      {/* Decorative Blob */}
-      <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[350px] md:w-[700px] h-[350px] md:h-[700px] rounded-full bg-gradient-to-tr from-brand-accent to-brand-secondary opacity-[0.05] blur-[100px] md:blur-[160px] pointer-events-none animate-pulse-subtle" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
+      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center -translate-y-2 md:-translate-y-8">
+
         {/* Left Side: Brand Value Proposition */}
         <div className="lg:col-span-7 flex flex-col items-start text-left">
-          
+
           {/* Tagline Badge */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -99,9 +119,9 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-lg md:text-xl font-inter font-semibold text-text-secondary mb-4 h-8"
+            className="text-xl sm:text-2xl md:text-3xl font-inter font-semibold text-text-secondary mb-4 h-10 sm:h-12 flex items-center"
           >
-            We build <span className="text-brand-secondary font-bold font-outfit border-r-2 border-brand-secondary pr-1.5 animate-pulse">{typedText}</span>
+            We build &nbsp;<TypingText />
           </motion.div>
 
           {/* Main Description */}
@@ -124,9 +144,12 @@ const Hero = () => {
             <Button variant="primary" onClick={() => navigate('/contact')}>
               Get Started <ArrowRight className="w-4 h-4" />
             </Button>
-            
-            <Button variant="secondary" onClick={() => handleScrollTo('portfolio')}>
-              View Portfolio
+
+            <Button
+              variant="secondary"
+              onClick={() => window.open("https://wa.me/918940105075?text=Hello%20UareTech%20Team%2C%0A%0AThank%20you%20for%20your%20time.%20I%20would%20like%20to%20discuss%20my%20project%20requirements%20and%20explore%20how%20your%20team%20can%20help%20with%20my%20business%20goals.%0A%0ALooking%20forward%20to%20hearing%20from%20you.", "_blank")}
+            >
+              WhatsApp Us
             </Button>
           </motion.div>
         </div>
@@ -137,16 +160,16 @@ const Hero = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[400px] aspect-square flex items-center justify-center"
+            className="relative w-full max-w-[280px] sm:max-w-[340px] md:max-w-[400px] aspect-square flex items-center justify-center"
           >
             {/* Background Dashed Circles */}
-            <motion.div 
+            <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
               className="absolute inset-0 rounded-full border-2 border-dashed border-white/5 pointer-events-none"
             />
-            
-            <motion.div 
+
+            <motion.div
               animate={{ rotate: -360 }}
               transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
               className="absolute w-[80%] h-[80%] rounded-full border border-dashed border-brand-primary/10 pointer-events-none"
@@ -183,47 +206,31 @@ const Hero = () => {
                   </linearGradient>
                 </defs>
               </svg>
-              
-              {/* Glowing Ambient Blobs inside card */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-brand-accent opacity-20 rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-brand-primary opacity-20 rounded-full blur-2xl pointer-events-none" />
+
+
             </motion.div>
 
             {/* Orbiting Tech Cards */}
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute -top-4 -right-4 px-3.5 py-2 rounded-xl bg-white shadow-glass border border-slate-200/60 text-xs font-bold font-outfit text-text-primary flex items-center gap-1.5"
+              className="absolute top-0 right-0 sm:-top-4 sm:-right-4 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white shadow-glass border border-slate-200/60 text-[10px] sm:text-xs font-bold font-outfit text-text-primary flex items-center gap-1.5"
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400" />
               <span>AI Models Engaged</span>
             </motion.div>
 
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-              className="absolute -bottom-4 -left-4 px-3.5 py-2 rounded-xl bg-white shadow-glass border border-slate-200/60 text-xs font-bold font-outfit text-text-primary flex items-center gap-1.5"
+              className="absolute bottom-0 left-0 sm:-bottom-4 sm:-left-4 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white shadow-glass border border-slate-200/60 text-[10px] sm:text-xs font-bold font-outfit text-text-primary flex items-center gap-1.5"
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-brand-primary animate-pulse" />
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-brand-primary animate-pulse" />
               <span>Full Scale Architecture</span>
             </motion.div>
           </motion.div>
         </div>
 
-      </div>
-
-      {/* Floating Bottom Scroll Arrow Indicator */}
-      <div 
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-pointer pointer-events-none" 
-        onClick={() => handleScrollTo('about')}
-      >
-        <span className="text-[10px] font-bold tracking-widest text-text-tertiary uppercase font-inter">Scroll Down</span>
-        <motion.div
-          animate={{ y: [0, 4, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <ArrowDown className="w-4 h-4 text-text-tertiary" />
-        </motion.div>
       </div>
 
     </section>

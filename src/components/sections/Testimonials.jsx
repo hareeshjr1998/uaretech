@@ -15,8 +15,6 @@ const Testimonials = () => {
       id="testimonials"
       className="relative py-24 z-10 overflow-hidden bg-white"
     >
-      {/* Decorative Blob */}
-      <div className="absolute top-[30%] left-[-5%] w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-brand-accent to-brand-primary opacity-5 blur-[100px] pointer-events-none animate-pulse-subtle" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative">
         

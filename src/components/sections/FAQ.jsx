@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { faqData } from '../../data/siteData';
 
 // Accordion Panel Sub-component
-const FAQItem = ({ question, answer, isExpanded, onToggle }) => {
+const FAQItem = memo(({ question, answer, isExpanded, onToggle }) => {
   return (
     <div className="glass-card mb-4 border border-slate-200/60 bg-white overflow-hidden">
       {/* Accordion header button */}
@@ -41,22 +41,21 @@ const FAQItem = ({ question, answer, isExpanded, onToggle }) => {
       </AnimatePresence>
     </div>
   );
-};
+});
 
 const FAQ = () => {
   const [expandedId, setExpandedId] = useState(1); // Keep the first FAQ expanded by default
 
-  const handleToggle = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
+  const handleToggle = useCallback((id) => {
+    setExpandedId((prevExpandedId) => (prevExpandedId === id ? null : id));
+  }, []);
 
   return (
     <section
       id="faq"
       className="relative py-24 z-10 overflow-hidden bg-white"
     >
-      {/* Decorative Blob */}
-      <div className="absolute top-[20%] left-[-10%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-brand-start to-brand-accent opacity-5 blur-[120px] pointer-events-none animate-pulse-subtle" />
+
 
       <div className="max-w-4xl mx-auto px-6 relative">
         
@@ -100,4 +99,4 @@ const FAQ = () => {
   );
 };
 
-export default FAQ;
+export default memo(FAQ);

@@ -4,6 +4,7 @@ import { setActiveSection } from '../redux/slices/navSlice';
 
 const useActiveSection = (sectionIds) => {
   const dispatch = useDispatch();
+  const sectionIdsKey = sectionIds.join(',');
 
   useEffect(() => {
     const handleIntersection = (entries) => {
@@ -22,8 +23,9 @@ const useActiveSection = (sectionIds) => {
     };
 
     const observer = new IntersectionObserver(handleIntersection, observerOptions);
+    const ids = sectionIdsKey.split(',');
 
-    sectionIds.forEach((id) => {
+    ids.forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
         observer.observe(el);
@@ -31,14 +33,15 @@ const useActiveSection = (sectionIds) => {
     });
 
     return () => {
-      sectionIds.forEach((id) => {
+      ids.forEach((id) => {
         const el = document.getElementById(id);
         if (el) {
           observer.unobserve(el);
         }
       });
+      observer.disconnect();
     };
-  }, [dispatch, sectionIds]);
+  }, [dispatch, sectionIdsKey]);
 };
 
 export default useActiveSection;

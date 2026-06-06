@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import FloatingBlobs from '../components/common/FloatingBlobs';
 import PageTransition from '../components/common/PageTransition';
 
 const ServicesPage = () => {
@@ -128,8 +127,6 @@ const ServicesPage = () => {
   return (
     <PageTransition>
       <div className="relative min-h-screen w-full flex flex-col overflow-hidden bg-white text-text-secondary">
-        {/* Visual blooms */}
-        <FloatingBlobs />
         
         {/* Navigation */}
         <Navbar />
@@ -180,8 +177,9 @@ const ServicesPage = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
+                    whileHover={{ y: -6 }}
                     transition={{ duration: 0.5, delay: i * 0.05 }}
-                    className="glass-card border-glow-card p-8 flex flex-col justify-between text-left group hover:-translate-y-1.5 transition-all duration-300 bg-white border-slate-200/60"
+                    className="glass-card border-glow-card p-8 flex flex-col justify-between text-left group transition-[border-color,background-color,box-shadow] duration-300 bg-white border-slate-200/60"
                   >
                     <div>
                       {/* Icon */}

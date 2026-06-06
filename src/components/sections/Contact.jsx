@@ -1,75 +1,186 @@
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2, ChevronDown, Linkedin, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
+import emailjs from '@emailjs/browser';
 import { updateForm, resetForm, setSubmitStatus } from '../../redux/slices/contactSlice';
 import Button from '../common/Button';
 import GlassCard from '../common/GlassCard';
 
 const Contact = () => {
   const dispatch = useDispatch();
-  const { formData, status } = useSelector((state) => state.contact);
+  const location = useLocation();
+  const { formData, status, errorMessage } = useSelector((state) => state.contact);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
+  const getPhoneError = () => {
+    if (formData.phone.length > 0 || phoneTouched) {
+      if (!formData.phone) {
+        return 'Phone number is required.';
+      } else if (formData.phone.length < 10) {
+        return 'Phone number must be at least 10 digits.';
+      } else if (formData.phone.length > 15) {
+        return 'Phone number cannot exceed 15 digits.';
+      }
+    }
+    return '';
+  };
+
+  const phoneError = getPhoneError();
+
+  const servicesList = [
+    { category: 'Development', options: ['Web Engineering', 'App Development', 'E-Commerce Solutions', 'SaaS Product Development'] },
+    { category: 'AI & Automation', options: ['AI Chatbot Development', 'WhatsApp Automation', 'Workflow Automation', 'CRM & Sales Automation'] },
+    { category: 'Marketing', options: ['Meta Ads Management', 'Google Ads & PPC', 'SEO & Digital Growth', 'AI Content Generation'] },
+    { category: 'Design & Branding', options: ['Product Design (UI/UX)', 'Brand Architecture', 'Video Production'] },
+    { category: 'Tech Solutions', options: ['Analytics Dashboards', 'Cloud & IT Setup', 'Cybersecurity'] },
+    { category: 'Additional Option', options: ['Other (Tell us your requirement)'] },
+  ];
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const serviceParam = queryParams.get('service');
+    if (serviceParam) {
+      const decodedService = decodeURIComponent(serviceParam);
+      let matchedService = '';
+      for (const group of servicesList) {
+        const found = group.options.find(opt => opt.toLowerCase() === decodedService.toLowerCase());
+        if (found) {
+          matchedService = found;
+          break;
+        }
+      }
+      if (matchedService) {
+        dispatch(updateForm({ service: matchedService }));
+      }
+    }
+  }, [location, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    dispatch(updateForm({ [name]: value }));
-  };
-
-  const fireConfetti = () => {
-    const duration = 3 * 1000;
-    const end = Date.now() + duration;
-
-    (function frame() {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#06B6D4', '#7C3AED', '#8B5CF6', '#0EA5E9']
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#06B6D4', '#7C3AED', '#8B5CF6', '#0EA5E9']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    }());
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, '');
+      dispatch(updateForm({ [name]: numericValue }));
+    } else {
+      dispatch(updateForm({ [name]: value }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
+    if (!formData.name || !formData.email || !formData.phone || !formData.service || !formData.message) {
+      dispatch(setSubmitStatus({ status: 'error', error: 'All fields are required.' }));
+      return;
+    }
+
+    // Email Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(formData.email)) {
+      dispatch(setSubmitStatus({ status: 'error', error: 'Please enter a valid email address.' }));
+      return;
+    }
+
+    // Phone Number Validation
+    if (formData.phone.length < 10 || formData.phone.length > 15) {
+      setPhoneTouched(true);
+      dispatch(setSubmitStatus({ status: 'error', error: 'Please enter a valid phone number.' }));
+      return;
+    }
+
+    const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+    console.log('EmailJS Config Check:', {
+      hasServiceID: !!serviceID,
+      hasTemplateID: !!templateID,
+      hasPublicKey: !!publicKey,
+      serviceID,
+      templateID,
+      publicKey
+    });
+
+    if (!serviceID || !templateID || !publicKey || serviceID.includes('your_') || templateID.includes('your_') || publicKey.includes('your_')) {
+      dispatch(setSubmitStatus({ 
+        status: 'error', 
+        error: 'EmailJS is not configured. Please define valid VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY keys in your .env file.' 
+      }));
+      return;
+    }
 
     dispatch(setSubmitStatus({ status: 'sending' }));
 
-    setTimeout(() => {
-      dispatch(setSubmitStatus({ status: 'success' }));
-      fireConfetti();
-      
-      setTimeout(() => {
-        dispatch(resetForm());
-      }, 4000);
-    }, 1500);
+    const templateParams = {
+      from_name: formData.name,
+      name: formData.name,
+      user_name: formData.name,
+      sender_name: formData.name,
+      client_name: formData.name,
+
+      reply_to: formData.email,
+      email: formData.email,
+      user_email: formData.email,
+      from_email: formData.email,
+      sender_email: formData.email,
+      email_address: formData.email,
+
+      phone_number: formData.phone,
+      phone: formData.phone,
+      user_phone: formData.phone,
+      sender_phone: formData.phone,
+
+      selected_service: formData.service,
+      service: formData.service,
+      subject: formData.service,
+
+      message: formData.message,
+    };
+
+    emailjs.send(serviceID, templateID, templateParams, {
+      publicKey: publicKey
+    })
+      .then((response) => {
+        console.log('EmailJS Response:', response);
+        if (response.status !== 200) {
+          throw new Error(`EmailJS responded with non-success status: ${response.status} (${response.text})`);
+        }
+        
+        console.log('EmailJS Send Success:', {
+          status: response.status,
+          text: response.text
+        });
+
+        dispatch(setSubmitStatus({ status: 'success' }));
+        setPhoneTouched(false);
+        setPhoneError('');
+        
+        setTimeout(() => {
+          dispatch(resetForm());
+        }, 4000);
+      })
+      .catch((err) => {
+        console.error('EmailJS Send Failure Details:', err);
+        const errMsg = err?.text || err?.message || 'Failed to send message. Please verify your EmailJS keys in the .env file.';
+        dispatch(setSubmitStatus({ 
+          status: 'error', 
+          error: errMsg
+        }));
+      });
   };
 
   const contactInfos = [
-    { icon: Mail, label: 'Email Us', value: 'hello@uaretech.com', link: 'mailto:hello@uaretech.com' },
-    { icon: Phone, label: 'Call Us', value: '+1 (555) 392-0941', link: 'tel:+15553920941' },
-    { icon: MapPin, label: 'Visit Us', value: '72 S. Market St, San Jose, CA', link: 'https://maps.google.com' },
+    { icon: Mail, label: 'Email Us', value: 'uaretech2926@gmail.com', link: 'mailto:uaretech2926@gmail.com' },
+    { icon: Phone, label: 'Call Us', value: '+91 89401 05075', link: 'tel:+918940105075' },
+    { icon: MapPin, label: 'Our Location', value: 'Madurai, Tamil Nadu, India', link: 'https://maps.google.com/?q=Madurai,Tamil+Nadu,India' },
   ];
 
   return (
     <section
       id="contact"
-      className="relative py-24 z-10 overflow-hidden bg-[#FFF8F2]"
+      className="relative py-24 z-10 overflow-hidden bg-[#F8FAFC]"
     >
-      {/* Decorative Blob */}
-      <div className="absolute bottom-[5%] right-[-10%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-brand-start to-brand-accent opacity-5 blur-[120px] pointer-events-none animate-pulse-subtle" />
+
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative">
         
@@ -128,22 +239,37 @@ const Contact = () => {
               })}
             </div>
 
-            {/* Styled Responsive Google Map */}
+            {/* Follow Our Journey Section */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="w-full h-[250px] sm:h-[280px] rounded-3xl overflow-hidden shadow-glass border border-slate-200/60 relative p-1.5 bg-white"
+              className="w-full p-8 rounded-3xl shadow-glass border border-slate-200/60 bg-white flex flex-col items-center justify-center gap-6"
             >
-              <iframe
-                title="UareTech San Jose HQ Address"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3172.3385750275815!2d-121.89069502422774!3d37.33446867209932!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fcca234a4d467%3A0x7dbe0d75cf78e6be!2s72%20S%20Market%20St%2C%20San%20Jose%2C%20CA%2095113!5e0!3m2!1sen!2sus!4v1716982845942!5m2!1sen!2sus"
-                className="w-full h-full rounded-2xl border-none opacity-75 hover:opacity-100 transition-opacity duration-300"
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+              <h4 className="font-outfit font-extrabold text-lg text-text-primary tracking-tight">
+                Follow Our Journey
+              </h4>
+              <div className="flex items-center gap-6">
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-14 h-14 rounded-2xl bg-[#0077B5]/10 hover:bg-[#0077B5]/20 flex items-center justify-center text-[#0077B5] transition-all duration-300 hover:scale-110 shadow-sm"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="w-7 h-7" />
+                </a>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-14 h-14 rounded-2xl bg-[#E1306C]/10 hover:bg-[#E1306C]/20 flex items-center justify-center text-[#E1306C] transition-all duration-300 hover:scale-110 shadow-sm"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-7 h-7" />
+                </a>
+              </div>
             </motion.div>
 
           </div>
@@ -205,7 +331,11 @@ const Contact = () => {
                       />
                       <label 
                         htmlFor="name"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none font-inter text-xs sm:text-sm font-semibold text-text-tertiary peer-placeholder-shown:text-text-tertiary peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:-translate-y-1/2 peer-focus:bg-white peer-focus:px-1.5 transition-all duration-300 origin-left"
+                        className={`absolute left-4 transition-all duration-300 pointer-events-none font-inter font-semibold ${
+                          formData.name 
+                            ? 'top-0 text-xs text-text-tertiary bg-white px-1.5 -translate-y-1/2 peer-focus:text-brand-primary' 
+                            : 'top-1/2 -translate-y-1/2 text-sm text-text-tertiary peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:bg-white peer-focus:px-1.5 peer-focus:-translate-y-1/2'
+                        }`}
                       >
                         Full Name *
                       </label>
@@ -226,7 +356,11 @@ const Contact = () => {
                       />
                       <label 
                         htmlFor="email"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none font-inter text-xs sm:text-sm font-semibold text-text-tertiary peer-placeholder-shown:text-text-tertiary peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:-translate-y-1/2 peer-focus:bg-white peer-focus:px-1.5 transition-all duration-300 origin-left"
+                        className={`absolute left-4 transition-all duration-300 pointer-events-none font-inter font-semibold ${
+                          formData.email 
+                            ? 'top-0 text-xs text-text-tertiary bg-white px-1.5 -translate-y-1/2 peer-focus:text-brand-primary' 
+                            : 'top-1/2 -translate-y-1/2 text-sm text-text-tertiary peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:bg-white peer-focus:px-1.5 peer-focus:-translate-y-1/2'
+                        }`}
                       >
                         Email Address *
                       </label>
@@ -238,17 +372,68 @@ const Contact = () => {
                         type="tel"
                         name="phone"
                         id="phone"
+                        required
                         placeholder=" "
+                        maxLength={15}
                         value={formData.phone}
                         onChange={handleInputChange}
+                        onBlur={() => setPhoneTouched(true)}
                         disabled={status === 'sending'}
-                        className="peer w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-brand-primary/40 bg-white text-slate-900 font-inter text-sm outline-none transition-all duration-300 shadow-sm"
+                        className={`peer w-full px-4 py-3.5 rounded-xl border ${
+                          phoneError && phoneTouched ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-brand-primary/40'
+                        } bg-white text-slate-900 font-inter text-sm outline-none transition-all duration-300 shadow-sm`}
                       />
                       <label 
                         htmlFor="phone"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none font-inter text-xs sm:text-sm font-semibold text-text-tertiary peer-placeholder-shown:text-text-tertiary peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:-translate-y-1/2 peer-focus:bg-white peer-focus:px-1.5 transition-all duration-300 origin-left"
+                        className={`absolute left-4 transition-all duration-300 pointer-events-none font-inter font-semibold ${
+                          formData.phone 
+                            ? 'top-0 text-xs text-text-tertiary bg-white px-1.5 -translate-y-1/2 peer-focus:text-brand-primary' 
+                            : 'top-1/2 -translate-y-1/2 text-sm text-text-tertiary peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:bg-white peer-focus:px-1.5 peer-focus:-translate-y-1/2'
+                        }`}
                       >
-                        Phone Number (Optional)
+                        Phone Number *
+                      </label>
+                      {phoneError && phoneTouched && (
+                        <div className="text-red-500 font-inter text-[11px] font-semibold mt-1.5 px-1 text-left">
+                          {phoneError}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Form Input: Service Dropdown */}
+                    <div className="relative text-left">
+                      <select
+                        name="service"
+                        id="service"
+                        required
+                        value={formData.service}
+                        onChange={handleInputChange}
+                        disabled={status === 'sending'}
+                        className="peer w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-brand-primary/40 bg-white text-slate-900 font-inter text-sm outline-none transition-all duration-300 shadow-sm appearance-none cursor-pointer pr-10"
+                      >
+                        <option value="" disabled hidden></option>
+                        {servicesList.map((group) => (
+                          <optgroup key={group.category} label={group.category} className="font-outfit font-bold text-xs text-brand-primary bg-slate-50">
+                            {group.options.map((opt) => (
+                              <option key={opt} value={opt} className="font-inter text-sm text-slate-900 bg-white">
+                                {opt}
+                              </option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                      <label 
+                        htmlFor="service"
+                        className={`absolute left-4 transition-all duration-300 pointer-events-none font-inter font-semibold ${
+                          formData.service 
+                            ? 'top-0 text-xs text-text-tertiary bg-white px-1.5 -translate-y-1/2 peer-focus:text-brand-primary' 
+                            : 'top-1/2 -translate-y-1/2 text-sm text-text-tertiary peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:bg-white peer-focus:px-1.5 peer-focus:-translate-y-1/2'
+                        }`}
+                      >
+                        Select a Service *
                       </label>
                     </div>
 
@@ -267,11 +452,22 @@ const Contact = () => {
                       />
                       <label 
                         htmlFor="message"
-                        className="absolute left-4 top-4 pointer-events-none font-inter text-xs sm:text-sm font-semibold text-text-tertiary peer-placeholder-shown:text-text-tertiary peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:-translate-y-1/2 peer-focus:bg-white peer-focus:px-1.5 transition-all duration-300 origin-left"
+                        className={`absolute left-4 transition-all duration-300 pointer-events-none font-inter font-semibold ${
+                          formData.message 
+                            ? 'top-0 text-xs text-text-tertiary bg-white px-1.5 -translate-y-1/2 peer-focus:text-brand-primary' 
+                            : 'top-4 text-sm text-text-tertiary peer-focus:top-0 peer-focus:text-xs peer-focus:text-brand-primary peer-focus:bg-white peer-focus:px-1.5 peer-focus:-translate-y-1/2'
+                        }`}
                       >
                         Tell us about your project *
                       </label>
                     </div>
+
+                    {/* Validation Error Message */}
+                    {status === 'error' && (
+                      <div className="text-red-500 font-inter text-xs font-bold text-left px-1 animate-pulse">
+                        ⚠️ {errorMessage || 'Please fill in all required fields correctly.'}
+                      </div>
+                    )}
 
                     {/* Form submit status controls */}
                     <Button

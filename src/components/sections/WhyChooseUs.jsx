@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { whyChooseUsData } from '../../data/siteData';
 import GlassCard from '../common/GlassCard';
@@ -14,8 +15,8 @@ const WhyChooseUs = () => {
 
   const cardVariants = {
     hidden: { opacity: 0, y: 25 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
     },
@@ -26,11 +27,8 @@ const WhyChooseUs = () => {
       id="why-choose-us"
       className="relative py-24 z-10 overflow-hidden bg-[#F8FAFC]"
     >
-      {/* Decorative Blob */}
-      <div className="absolute bottom-[10%] right-[-10%] w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-brand-accent to-brand-secondary opacity-5 blur-[120px] pointer-events-none animate-pulse-subtle" />
-
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative">
-        
+
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-20">
           <motion.h2
@@ -98,4 +96,4 @@ const WhyChooseUs = () => {
   );
 };
 
-export default WhyChooseUs;
+export default memo(WhyChooseUs);

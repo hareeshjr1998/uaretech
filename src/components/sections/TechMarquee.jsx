@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
+import { memo } from 'react';
 
 const TechMarquee = () => {
-  // Row 1 Technologies from Screenshot
+  // Row 1 Technologies
   const row1 = [
     { name: 'Firebase', color: '#FFC857' },
     { name: 'Node.js', color: '#6EE7F9' },
@@ -16,7 +16,7 @@ const TechMarquee = () => {
     { name: 'Zapier', color: '#FFC857' },
   ];
 
-  // Row 2 Technologies from Screenshot
+  // Row 2 Technologies
   const row2 = [
     { name: 'Google Analytics', color: '#FF9A8B' },
     { name: 'Webflow', color: '#60A5FA' },
@@ -31,27 +31,16 @@ const TechMarquee = () => {
     { name: 'Google Cloud', color: '#E9D5FF' },
   ];
 
-  // Duplicate items to ensure a seamless infinite looping experience
   const marquee1 = [...row1, ...row1, ...row1];
   const marquee2 = [...row2, ...row2, ...row2];
 
   return (
     <section className="relative py-16 bg-white overflow-hidden z-10 select-none">
-      
-      {/* Decorative background glow behind the marquee */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-32 rounded-full bg-gradient-to-r from-brand-start to-brand-end opacity-[0.03] blur-[80px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 mb-10 text-center">
-        {/* Uppercase descriptive header with wide letter tracking */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="font-outfit text-xs font-bold uppercase tracking-[0.25em] text-text-tertiary"
-        >
+        <p className="font-outfit text-xs font-bold uppercase tracking-[0.25em] text-text-tertiary">
           Trusted Tools & Technologies We Work With
-        </motion.p>
+        </p>
       </div>
 
       {/* Infinite scrolling rows */}
@@ -63,22 +52,12 @@ const TechMarquee = () => {
 
         {/* Row 1: Scrolling Right-to-Left */}
         <div className="flex w-max">
-          <motion.div
-            animate={{ x: [0, '-33.33%'] }}
-            transition={{
-              ease: 'linear',
-              duration: 35,
-              repeat: Infinity,
-            }}
-            className="flex gap-4 pr-4"
-          >
+          <div className="flex gap-4 pr-4 animate-marquee-r2l">
             {marquee1.map((tool, idx) => (
-              <motion.div
+              <div
                 key={`r1-${idx}`}
-                whileHover={{ y: -3, scale: 1.02 }}
-                className="glass-card flex items-center gap-2.5 px-6 py-3 border border-slate-200/60 bg-white shadow-sm cursor-pointer whitespace-nowrap transition-all duration-300 hover:bg-slate-50"
+                className="glass-card flex items-center gap-2.5 px-6 py-3 border border-slate-200/60 bg-white shadow-sm cursor-pointer whitespace-nowrap transition-all duration-300 hover:bg-slate-50 hover:-translate-y-0.5 hover:scale-[1.01]"
               >
-                {/* UareTech Logo Palette Inspired Dynamic Dots */}
                 <div 
                   className="w-2.5 h-2.5 rounded-full shadow-sm" 
                   style={{ backgroundColor: tool.color }} 
@@ -86,29 +65,19 @@ const TechMarquee = () => {
                 <span className="font-outfit font-extrabold text-sm text-text-primary tracking-wide">
                   {tool.name}
                 </span>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         {/* Row 2: Scrolling Left-to-Right */}
         <div className="flex w-max">
-          <motion.div
-            animate={{ x: ['-33.33%', 0] }}
-            transition={{
-              ease: 'linear',
-              duration: 38,
-              repeat: Infinity,
-            }}
-            className="flex gap-4 pr-4"
-          >
+          <div className="flex gap-4 pr-4 animate-marquee-l2r">
             {marquee2.map((tool, idx) => (
-              <motion.div
+              <div
                 key={`r2-${idx}`}
-                whileHover={{ y: -3, scale: 1.02 }}
-                className="glass-card flex items-center gap-2.5 px-6 py-3 border border-slate-200/60 bg-white shadow-sm cursor-pointer whitespace-nowrap transition-all duration-300 hover:bg-slate-50"
+                className="glass-card flex items-center gap-2.5 px-6 py-3 border border-slate-200/60 bg-white shadow-sm cursor-pointer whitespace-nowrap transition-all duration-300 hover:bg-slate-50 hover:-translate-y-0.5 hover:scale-[1.01]"
               >
-                {/* UareTech Logo Palette Inspired Dynamic Dots */}
                 <div 
                   className="w-2.5 h-2.5 rounded-full shadow-sm" 
                   style={{ backgroundColor: tool.color }} 
@@ -116,9 +85,9 @@ const TechMarquee = () => {
                 <span className="font-outfit font-extrabold text-sm text-text-primary tracking-wide">
                   {tool.name}
                 </span>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
 
       </div>
@@ -127,4 +96,4 @@ const TechMarquee = () => {
   );
 };
 
-export default TechMarquee;
+export default memo(TechMarquee);
