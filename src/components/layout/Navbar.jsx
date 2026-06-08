@@ -115,7 +115,7 @@ const Navbar = () => {
           onClick={() => handleNavClick({ path: '/' })} 
           className="flex items-center gap-2.5 cursor-pointer select-none group"
         >
-          <img src="/UTC.png" alt="UareTech Logo" className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105" />
+          <img src="/uaretechlogo.png" alt="UareTech Logo" className="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-105" />
           <span className="font-outfit font-extrabold text-2xl tracking-tight text-text-primary group-hover:opacity-90 transition-opacity">
             Uare<span className="text-gradient">Tech</span>
           </span>
